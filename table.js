@@ -3,7 +3,6 @@ var thead = otab.tHead;
 var oths = thead.rows[0].cells;
 var tbody = otab.tBodies[0];
 var rows = tbody.rows;
-console.log(rows)
 
 var data = null;
 var xhr = new XMLHttpRequest;
@@ -47,11 +46,22 @@ function changeBg(){
 changeBg();
 
 //表格排序方法
-function sort(){
-    oths[1].flag *= -1;
+function sort(n){
+    var _this = this;
     var arr = utils.listToArray(rows);
+    _this.flag *= -1;
+    for(var j = 0; j < oths.length; j++){
+        if(oths[j] !== this){
+            oths[j].flag = -1;
+        }
+    }
     arr.sort(function(a,b){
-        return (parseFloat(a.cells[1].innerHTML) - parseFloat(b.cells[1].innerHTML))* oths[1].flag;
+        var curinn = a.cells[n].innerHTML;
+        var nextinn = b.cells[n].innerHTML;
+        if(isNaN(curinn) || isNaN(nextinn)){
+            return curinn.localeCompare(nextinn)*_this.flag;
+        }
+        return (parseFloat(curinn) - parseFloat(nextinn))* _this.flag;
     })
     var frg = document.createDocumentFragment();
     for(var i = 0; i < arr.length; i++){
@@ -61,7 +71,14 @@ function sort(){
     frg = null;
     changeBg();
 }
-oths[1].flag = -1;
-oths[1].onclick = function(){
-    sort();
+//所有具有cursor样式实现点击排序
+for(var i = 0; i < oths.length; i++){
+    var curth = oths[i];
+    curth.index = i;
+    curth.flag = -1;
+    if(curth.className === "cursor"){
+        curth.onclick = function(){
+            sort.call(this,this.index);
+        }
+    }
 }
